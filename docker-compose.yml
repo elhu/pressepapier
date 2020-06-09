@@ -1,0 +1,22 @@
+version: "3.4"
+services:
+  # front-end built with react
+  ui:
+    stdin_open: true
+    build:
+      context: ui
+      target: dev
+    volumes:
+      - ./ui:/root
+    ports:
+      - "3000:3000"
+
+  # nginx is used for ssl termination
+  nginx:
+    build:
+      context: nginx
+      target: dev
+    ports:
+      - "443:443"
+    depends_on:
+      - ui
