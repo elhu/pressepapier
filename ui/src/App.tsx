@@ -1,11 +1,8 @@
 import React from 'react';
+import SignInPage from './SignInPage';
 
 const App: React.SFC = () => {
-  return (
-    <div>
-      <h1>Hello, Presse Papier</h1>
-    </div>
-  );
-}
+  return <SignInPage />;
+};
 
 export default App;
