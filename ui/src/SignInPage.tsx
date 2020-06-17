@@ -42,8 +42,12 @@ const SignInPage: React.FC<RouteComponentProps> = (props) => {
     const provider = new firebase.auth.GoogleAuthProvider();
 
     try {
-      const u = await firebase.auth().currentUser;
-      u ? await u.linkWithPopup(provider) : await firebase.auth().signInWithPopup(provider);
+      const user = await firebase.auth().currentUser;
+      if (user) {
+        await user.linkWithPopup(provider);
+      } else {
+        await firebase.auth().signInWithPopup(provider);
+      }
       props.history.push(ROUTE_HOME);
     } catch (err) {
       console.log('err: ', err);
