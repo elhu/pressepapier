@@ -1,13 +1,12 @@
 import React from 'react';
-import { NavLink, withRouter } from 'react-router-dom';
-import { RouteComponentProps } from 'react-router';
+import { NavLink } from 'react-router-dom';
 
 import { makeStyles } from '@material-ui/core/styles';
-import { AppBar, Avatar, IconButton, Link, Menu, MenuItem, Toolbar, Typography } from '@material-ui/core';
-import { AccountCircle } from '@material-ui/icons';
+import { AppBar, Link, Toolbar, Typography } from '@material-ui/core';
 
-import { ROUTE_HOME, ROUTE_SIGN_IN } from './const';
+import { ROUTE_HOME } from './const';
 import firebase from './utils/firebase';
+import UserMenu from './UserMenu';
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
@@ -28,31 +27,12 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-interface IProps extends RouteComponentProps {
+interface IProps {
   currentUser: firebase.User | null;
 }
 
 const Header: React.FC<IProps> = (props: IProps) => {
   const classes = useStyles();
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
-
-  const handleSignIn = () => {
-    setAnchorEl(null);
-    props.history.push(ROUTE_SIGN_IN);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleSignOut = async () => {
-    firebase.auth().signOut();
-  };
 
   return (
     <AppBar position="static" className={classes.appBar}>
@@ -62,46 +42,10 @@ const Header: React.FC<IProps> = (props: IProps) => {
             Presse-Papier
           </Link>
         </Typography>
-        <div>
-          <IconButton
-            aria-label="account of current user"
-            aria-controls="menu-appbar"
-            aria-haspopup="true"
-            onClick={handleMenu}
-            color="inherit"
-          >
-            {props.currentUser && props.currentUser.photoURL ? (
-              <Avatar>
-                <img src={props.currentUser.photoURL} alt="user avatar" referrerPolicy="no-referrer" />
-              </Avatar>
-            ) : (
-              <AccountCircle />
-            )}
-          </IconButton>
-          <Menu
-            anchorEl={anchorEl}
-            anchorOrigin={{
-              vertical: 'top',
-              horizontal: 'left',
-            }}
-            keepMounted
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'right',
-            }}
-            open={open}
-            onClose={handleClose}
-          >
-            {props.currentUser ? (
-              <MenuItem onClick={handleSignOut}>Sign out</MenuItem>
-            ) : (
-              <MenuItem onClick={handleSignIn}>Sign in/Register</MenuItem>
-            )}
-          </Menu>
-        </div>
+        <UserMenu {...props} />
       </Toolbar>
     </AppBar>
   );
 };
 
-export default withRouter(Header);
+export default Header;
