@@ -10,7 +10,8 @@ const App: React.FC = () => {
   const [currentUser, setCurrentUser] = React.useState<firebase.User | null>(null);
 
   React.useEffect(() => {
-    firebase.auth().onAuthStateChanged((u) => setCurrentUser(u));
+    const unsubscribe = firebase.auth().onAuthStateChanged((u) => setCurrentUser(u));
+    return unsubscribe;
   }, []);
 
   return (
