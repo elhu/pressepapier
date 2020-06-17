@@ -8,3 +8,6 @@ export const FIREBASE_APPID = process.env.REACT_APP_FIREBASE_APPID;
 export const FIREBASE_MEASUREMENTID = process.env.REACT_APP_FIREBASE_MEASUREMENTID;
 
 export const API_URL = process.env.REACT_APP_API_URL;
+
+export const ROUTE_SIGN_IN = '/sign-in';
+export const ROUTE_HOME = '/';

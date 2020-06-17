@@ -1,14 +1,15 @@
 import * as React from 'react';
-import Avatar from '@material-ui/core/Avatar';
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
+import { RouteComponentProps } from 'react-router';
+import { withRouter } from 'react-router-dom';
+
+import { Avatar, Container, Grid, Typography } from '@material-ui/core';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
-import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
-import Container from '@material-ui/core/Container';
+
 import { GoogleLoginButton } from 'react-social-login-buttons';
 
 import firebase from './utils/firebase';
+import { ROUTE_HOME } from './const';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -34,51 +35,35 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const SignInPage: React.FC = () => {
+const SignInPage: React.FC<RouteComponentProps> = (props) => {
   const classes = useStyles();
-  const [user, setUser] = React.useState<firebase.User | null>(null)
-
-  React.useEffect(() => {
-    firebase.auth().onAuthStateChanged(u => setUser(u))
-  }, []);
 
   const handleGoogleSignup = async () => {
     const provider = new firebase.auth.GoogleAuthProvider();
 
     try {
-      const currentUser = await firebase.auth().currentUser;
-      currentUser
-        ? await currentUser.linkWithPopup(provider)
-        : await firebase.auth().signInWithPopup(provider);
+      const u = await firebase.auth().currentUser;
+      u ? await u.linkWithPopup(provider) : await firebase.auth().signInWithPopup(provider);
+      props.history.push(ROUTE_HOME);
     } catch (err) {
-      console.log("err: ", err)
+      console.log('err: ', err);
     }
   };
-
-  const handleSignOut = async () => {
-    await firebase.auth().signOut();
-  }
 
   return (
     <Container component="main" maxWidth="xs">
       <div className={classes.paper}>
         <Avatar className={classes.avatar}>
-          {user && user.photoURL
-            ? <img src={user.photoURL} alt="user avatar" />
-            : <LockOutlinedIcon />
-          }
+          <LockOutlinedIcon />
         </Avatar>
-        {!user && (
-          <Typography component="h1" variant="h5">
-            Sign in or register
-          </Typography>
-        )}
+
+        <Typography component="h1" variant="h5">
+          Sign in or register
+        </Typography>
+
         <Grid container className={classes.social}>
           <Grid item xs={12}>
-            {user
-              ? <Button fullWidth variant="contained" color="secondary" className={classes.signOut} onClick={handleSignOut}>Sign out</Button>
-              : <GoogleLoginButton className={classes.google} onClick={handleGoogleSignup} />
-            }
+            <GoogleLoginButton className={classes.google} onClick={handleGoogleSignup} text="Sign in with Google" />
           </Grid>
         </Grid>
       </div>
@@ -86,4 +71,4 @@ const SignInPage: React.FC = () => {
   );
 };
 
-export default SignInPage;
+export default withRouter(SignInPage);
