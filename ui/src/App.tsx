@@ -1,11 +1,25 @@
 import React from 'react';
+import { BrowserRouter as Router } from 'react-router-dom';
 
-const App: React.SFC = () => {
+import Header from './Header';
+import Routes from './Routes';
+
+import firebase from './utils/firebase';
+
+const App: React.FC = () => {
+  const [currentUser, setCurrentUser] = React.useState<firebase.User | null>(null);
+
+  React.useEffect(() => {
+    const unsubscribe = firebase.auth().onAuthStateChanged((u) => setCurrentUser(u));
+    return unsubscribe;
+  }, []);
+
   return (
-    <div>
-      <h1>Hello, Presse Papier</h1>
-    </div>
+    <Router>
+      <Header currentUser={currentUser} />
+      <Routes currentUser={currentUser} />
+    </Router>
   );
-}
+};
 
 export default App;
