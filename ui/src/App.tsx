@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 
-import Header from './Header';
 import Routes from './Routes';
 
 import firebase from './utils/firebase';
@@ -16,7 +15,6 @@ const App: React.FC = () => {
 
   return (
     <Router>
-      <Header currentUser={currentUser} />
       <Routes currentUser={currentUser} />
     </Router>
   );
