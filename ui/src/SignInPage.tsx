@@ -1,15 +1,10 @@
 import * as React from 'react';
-import { RouteComponentProps } from 'react-router';
-import { withRouter } from 'react-router-dom';
 
 import { Avatar, Container, Grid, Typography } from '@material-ui/core';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import { makeStyles } from '@material-ui/core/styles';
 
-import { GoogleLoginButton } from 'react-social-login-buttons';
-
-import firebase from './utils/firebase';
-import { ROUTE_HOME } from './const';
+import SignInButton from './SignInButton';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -35,24 +30,8 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const SignInPage: React.FC<RouteComponentProps> = (props) => {
+const SignInPage: React.FC = () => {
   const classes = useStyles();
-
-  const handleGoogleSignup = async () => {
-    const provider = new firebase.auth.GoogleAuthProvider();
-
-    try {
-      const user = await firebase.auth().currentUser;
-      if (user) {
-        await user.linkWithPopup(provider);
-      } else {
-        await firebase.auth().signInWithPopup(provider);
-      }
-      props.history.push(ROUTE_HOME);
-    } catch (err) {
-      console.log('err: ', err);
-    }
-  };
 
   return (
     <Container component="main" maxWidth="xs">
@@ -67,7 +46,7 @@ const SignInPage: React.FC<RouteComponentProps> = (props) => {
 
         <Grid container className={classes.social}>
           <Grid item xs={12}>
-            <GoogleLoginButton className={classes.google} onClick={handleGoogleSignup} text="Sign in with Google" />
+            <SignInButton className={classes.google} text="Sign in with Google" />
           </Grid>
         </Grid>
       </div>
@@ -75,4 +54,4 @@ const SignInPage: React.FC<RouteComponentProps> = (props) => {
   );
 };
 
-export default withRouter(SignInPage);
+export default SignInPage;
