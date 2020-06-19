@@ -12,3 +12,5 @@ export const API_URL = process.env.REACT_APP_API_URL;
 export const ROUTE_SIGN_IN = '/sign-in';
 export const ROUTE_HOME = '/';
 export const ROUTE_CLIPBOARDS = '/clipboards';
+
+export const LOGGED_IN_KEY = 'loggedIn';

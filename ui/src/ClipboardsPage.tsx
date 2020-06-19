@@ -5,6 +5,8 @@ import { Grid, Container, makeStyles, Typography, Modal, Backdrop, Fade, TextFie
 
 import { ROUTE_HOME } from './const';
 
+import { loggedIn } from './utils/session';
+
 const useStyles = makeStyles((theme) => ({
   main: {
     paddingTop: theme.spacing(8),
@@ -69,7 +71,7 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
     setOpen(false);
   };
 
-  if (!props.currentUser) {
+  if (!loggedIn()) {
     return <Redirect to={ROUTE_HOME} />;
   }
   return (

@@ -5,7 +5,9 @@ import { Container, Typography, makeStyles } from '@material-ui/core';
 
 import SignInButton from '../SignInButton';
 import logo from './hero.jpg';
+
 import { ROUTE_CLIPBOARDS } from '../const';
+import { loggedIn } from '../utils/session';
 
 const useStyles = makeStyles((theme) => ({
   main: {
@@ -65,7 +67,7 @@ interface IProps {
 const HomePage: React.FC<IProps> = (props: IProps) => {
   const classes = useStyles();
 
-  if (props.currentUser) {
+  if (loggedIn()) {
     return <Redirect to={ROUTE_CLIPBOARDS} />;
   }
   return (
