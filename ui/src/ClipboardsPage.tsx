@@ -1,7 +1,8 @@
 import React, { MouseEvent } from 'react';
 import { Redirect } from 'react-router-dom';
 
-import { Grid, Button, Container, makeStyles, Typography, Modal, Backdrop, Fade, TextField, Card, CardContent, CardActions } from '@material-ui/core';
+import { Grid, Button, Container, makeStyles, Typography, Modal, Backdrop, Fade, TextField, Card, CardContent, CardActions, Tooltip } from '@material-ui/core';
+import CopyToClipboard from 'react-copy-to-clipboard';
 
 import { ROUTE_HOME } from './const';
 
@@ -52,6 +53,7 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(2),
     textAlign: 'center',
     color: theme.palette.text.secondary,
+    cursor: 'pointer',
   },
   clipboards: {
     marginTop: theme.spacing(4),
@@ -74,6 +76,7 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
   const [clipboards, setClipboards] = React.useState(initClipboards);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
+
   React.useEffect(() => {
     setClipboards([]);
   }, []);
@@ -91,11 +94,10 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
   };
 
   const handleCopyClipboard = (e: MouseEvent<HTMLElement>) => {
-
   }
 
-  const handleDeleteClipboard = (id: number, e: MouseEvent<HTMLElement>) => {
-    const idx = clipboards.findIndex((c) => c.id === id)
+  const handleDeleteClipboard = (targetClipboard: Clipboard, e: MouseEvent<HTMLElement>) => {
+    const idx = clipboards.findIndex((c) => c.id === targetClipboard.id)
     setClipboards(Array.prototype.concat(clipboards.slice(0, idx), clipboards.slice(idx + 1)))
     e.stopPropagation();
   }
@@ -151,16 +153,20 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
       <Grid container spacing={3} className={classes.clipboards}>
         {clipboards.map((c) => (
           <Grid item xs={6} key={c.id} onClick={handleCopyClipboard}>
-            <Card className={classes.paper}>
-              <CardContent>
-                <Typography component="p" variant="body1">
-                  {c.data}
-                </Typography>
-              </CardContent>
-              <CardActions>
-                <Button size="small" onClick={(e: MouseEvent<HTMLElement>) => handleDeleteClipboard(c.id, e)}>Delete</Button>
-              </CardActions>
-            </Card>
+            <CopyToClipboard text={c.data}>
+              <Tooltip title="Clip to copy">
+                <Card className={classes.paper}>
+                  <CardContent>
+                    <Typography component="p" variant="body1">
+                      {c.data}
+                    </Typography>
+                  </CardContent>
+                  <CardActions>
+                    <Button size="small" onClick={(e: MouseEvent<HTMLElement>) => handleDeleteClipboard(c, e)}>Delete</Button>
+                  </CardActions>
+                </Card>
+              </Tooltip>
+            </CopyToClipboard>
           </Grid>
         ))}
       </Grid>
