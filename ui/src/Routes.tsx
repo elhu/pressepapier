@@ -5,7 +5,8 @@ import { RouteComponentProps } from 'react-router';
 import Header from './Header';
 import HomePage from './HomePage';
 import SignInPage from './SignInPage';
-import { ROUTE_HOME, ROUTE_SIGN_IN } from './const';
+import ClipboardsPage from './ClipboardsPage';
+import { ROUTE_CLIPBOARDS, ROUTE_HOME, ROUTE_SIGN_IN } from './const';
 
 interface IProps extends RouteComponentProps {
   currentUser: firebase.User | null;
@@ -21,8 +22,11 @@ const Routes: React.FC<IProps> = (props) => {
             <SignInPage {...props} />
           </Route>
         )}
+        <Route path={ROUTE_CLIPBOARDS}>
+          <ClipboardsPage {...props} />
+        </Route>
         <Route path={ROUTE_HOME} exact>
-          <HomePage />
+          <HomePage {...props} />
         </Route>
       </Switch>
     </React.Fragment>

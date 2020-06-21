@@ -1,9 +1,13 @@
 import * as React from 'react';
+import { Redirect } from 'react-router-dom';
 
 import { Container, Typography, makeStyles } from '@material-ui/core';
 
 import SignInButton from '../SignInButton';
 import logo from './hero.jpg';
+
+import { ROUTE_CLIPBOARDS } from '../const';
+import { loggedIn } from '../utils/session';
 
 const useStyles = makeStyles((theme) => ({
   main: {
@@ -56,9 +60,16 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const HomePage: React.FC = () => {
+interface IProps {
+  currentUser: firebase.User | null;
+}
+
+const HomePage: React.FC<IProps> = (props: IProps) => {
   const classes = useStyles();
 
+  if (loggedIn()) {
+    return <Redirect to={ROUTE_CLIPBOARDS} />;
+  }
   return (
     <Container component="main" maxWidth={false} className={classes.main}>
       <div className={classes.hero}>
