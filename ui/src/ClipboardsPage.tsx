@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { MouseEvent } from 'react';
 import { Redirect } from 'react-router-dom';
 
-import { Grid, Container, makeStyles, Typography, Modal, Backdrop, Fade, TextField, Paper } from '@material-ui/core';
+import { Grid, Button, Container, makeStyles, Typography, Modal, Backdrop, Fade, TextField, Card, CardContent, CardActions } from '@material-ui/core';
 
 import { ROUTE_HOME } from './const';
 
@@ -75,12 +75,10 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
-    setClipboards(initClipboards);
+    setClipboards([]);
   }, []);
 
   const handleClose = () => {
-    console.log(inputRef.current);
-
     setOpen(false);
   };
 
@@ -91,6 +89,16 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
   const handleModalRendered = () => {
     inputRef.current?.focus();
   };
+
+  const handleCopyClipboard = (e: MouseEvent<HTMLElement>) => {
+
+  }
+
+  const handleDeleteClipboard = (id: number, e: MouseEvent<HTMLElement>) => {
+    const idx = clipboards.findIndex((c) => c.id === id)
+    setClipboards(Array.prototype.concat(clipboards.slice(0, idx), clipboards.slice(idx + 1)))
+    e.stopPropagation();
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newClipboard: Clipboard = {
@@ -142,12 +150,17 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
       </Container>
       <Grid container spacing={3} className={classes.clipboards}>
         {clipboards.map((c) => (
-          <Grid item xs={6} key={c.id}>
-            <Paper className={classes.paper}>
-              <Typography component="p" variant="body1">
-                {c.data}
-              </Typography>
-            </Paper>
+          <Grid item xs={6} key={c.id} onClick={handleCopyClipboard}>
+            <Card className={classes.paper}>
+              <CardContent>
+                <Typography component="p" variant="body1">
+                  {c.data}
+                </Typography>
+              </CardContent>
+              <CardActions>
+                <Button size="small" onClick={(e: MouseEvent<HTMLElement>) => handleDeleteClipboard(c.id, e)}>Delete</Button>
+              </CardActions>
+            </Card>
           </Grid>
         ))}
       </Grid>
