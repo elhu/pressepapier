@@ -62,15 +62,20 @@ interface IProps {
   currentUser: firebase.User | null;
 }
 
+interface Clipboard {
+  data: string,
+  id: number,
+}
+
 const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
-  const initClipboards: string[] = [];
+  const initClipboards: Clipboard[] = [];
   const [clipboards, setClipboards] = React.useState(initClipboards);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
-    setClipboards(['1', '2', '3', '4', '5', '6', '7', '8', '9']);
+    setClipboards(initClipboards);
   }, []);
 
   const handleClose = () => {
@@ -88,6 +93,11 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newClipboard: Clipboard = {
+      data: e.currentTarget.value,
+      id: clipboards.length,
+    }
+    setClipboards([newClipboard].concat(clipboards));
     setOpen(false);
   };
 
@@ -132,10 +142,10 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
       </Container>
       <Grid container spacing={3} className={classes.clipboards}>
         {clipboards.map((c) => (
-          <Grid item xs={6} key={c}>
+          <Grid item xs={6} key={c.id}>
             <Paper className={classes.paper}>
               <Typography component="p" variant="body1">
-                {c}
+                {c.data}
               </Typography>
             </Paper>
           </Grid>
