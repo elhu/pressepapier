@@ -1,8 +1,7 @@
 package main
 
 import (
-	"net/http"
-
+	"github.com/elhu/pressepapier/backend/handlers"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -16,13 +15,8 @@ func main() {
 	e.Use(middleware.Recover())
 
 	// Routes
-	e.GET("/", hello)
+	e.GET("/health-check", handlers.HealthCheck)
 
 	// Start server
 	e.Logger.Fatal(e.Start(":1323"))
-}
-
-// Handler
-func hello(c echo.Context) error {
-	return c.String(http.StatusOK, "Hello, World!")
 }
