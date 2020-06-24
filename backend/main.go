@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/elhu/pressepapier/backend/handlers"
 	"github.com/elhu/pressepapier/backend/middlewares"
 	"github.com/elhu/pressepapier/backend/models"
@@ -21,6 +23,13 @@ func main() {
 	// Echo instance
 	e := echo.New()
 
+	// Setup DB connection
+	db, err := models.NewDB(os.Getenv("MYSQL_URL"))
+	if err != nil {
+		e.Logger.Fatal(err)
+	}
+	env := &utils.Env{db}
+
 	// Middleware
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
@@ -33,7 +42,7 @@ func main() {
 		e.Logger.Fatal(err)
 	}
 	g := e.Group("/api", authMiddleware)
-	g.GET("/clipboards", handlers.HealthCheck)
+	g.GET("/clipboards", handlerWrapper(env, handlers.IndexClipboards))
 
 	// Start server
 	e.Logger.Fatal(e.Start(":1323"))
