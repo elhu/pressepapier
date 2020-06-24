@@ -1,4 +1,4 @@
-package contexts
+package utils
 
 import (
 	"firebase.google.com/go/v4/auth"

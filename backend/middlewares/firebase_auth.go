@@ -6,8 +6,8 @@ import (
 	"os"
 	"strings"
 
-	firebase "firebase.google.com/go/v4"
-	"github.com/elhu/pressepapier/backend/contexts"
+	firebase "firebase.google.com/go"
+	"github.com/elhu/pressepapier/backend/utils"
 	"github.com/labstack/echo/v4"
 	"google.golang.org/api/option"
 )
@@ -33,9 +33,9 @@ func FirebaseAuth() (echo.MiddlewareFunc, error) {
 			if err != nil {
 				return c.JSON(http.StatusInternalServerError, err.Error())
 			}
-			rc := &contexts.Context{
+			rc := &utils.Context{
 				Context: c,
-				Token:   token,
+				Token:   nil,
 			}
 			return next(rc)
 		}
