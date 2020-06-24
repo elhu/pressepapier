@@ -1,9 +1,12 @@
 package contexts
 
-import "github.com/labstack/echo"
+import (
+	"firebase.google.com/go/v4/auth"
+	"github.com/labstack/echo/v4"
+)
 
 // Context for all requests
 type Context struct {
 	echo.Context
-	Token *fa.token
+	Token *auth.Token
 }
