@@ -112,9 +112,10 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
   }
 
   const handleDeleteClipboard = (targetClipboard: Clipboard, e: MouseEvent<HTMLElement>) => {
-    const idx = clipboards.findIndex((c) => c.id === targetClipboard.id)
-    setClipboards(Array.prototype.concat(clipboards.slice(0, idx), clipboards.slice(idx + 1)))
     e.stopPropagation();
+    api.del(`/clipboards/${targetClipboard.id}`).then(() => {
+      setClipboards(clipboards.filter((c) => c.id !== targetClipboard.id));
+    });
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {

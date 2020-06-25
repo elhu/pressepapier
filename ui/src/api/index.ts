@@ -28,8 +28,16 @@ const post = <T = any, R = AxiosResponse<T>>(
   return api.post<T, R>(url, data, config)
 }
 
+const del = <T = any, R = AxiosResponse<T>>(
+  url: string,
+  config?: AxiosRequestConfig,
+): Promise<R> => {
+  return api.delete<T, R>(url, config)
+}
+
 export default {
   setToken,
   get,
   post,
+  del,
 }

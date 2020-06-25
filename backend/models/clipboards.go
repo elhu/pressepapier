@@ -80,3 +80,13 @@ func (db *DB) CreateClipboard(userUUID string, data string) (*Clipboard, error) 
 		UserUUID: userUUID,
 	}, nil
 }
+
+// DeleteClipboard deletes the specified clipboard for the specified user
+func (db *DB) DeleteClipboard(userUUID string, cbID int) error {
+	stmt := `
+	DELETE FROM clipboards
+	WHERE user_uuid = ? AND id = ?
+	`
+	_, err := db.Exec(stmt, userUUID, cbID)
+	return err
+}

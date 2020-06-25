@@ -45,6 +45,7 @@ func main() {
 	g := e.Group("/api", authMiddleware)
 	g.GET("/clipboards", handlerWrapper(env, handlers.IndexClipboards))
 	g.POST("/clipboards", handlerWrapper(env, handlers.CreateClipboards))
+	g.DELETE("/clipboards/:id", handlerWrapper(env, handlers.DeleteClipboards))
 
 	// Start server
 	e.Logger.Fatal(e.Start(":1323"))

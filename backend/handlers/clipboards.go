@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/elhu/pressepapier/backend/bindings"
 	"github.com/elhu/pressepapier/backend/renderings"
@@ -41,5 +42,18 @@ func CreateClipboards(c echo.Context, e *utils.Env) error {
 		ID:   cb.ID,
 		Data: cb.Data,
 	}
-	return c.JSON(http.StatusOK, resp)
+	return c.JSON(http.StatusCreated, resp)
+}
+
+// DeleteClipboards - deletes the specified clipboard
+func DeleteClipboards(c echo.Context, e *utils.Env) error {
+	cc := c.(*utils.Context)
+	id, err := strconv.Atoi(cc.Param("id"))
+	if err != nil {
+		return err
+	}
+	if err = e.DB.DeleteClipboard(cc.Token.UID, id); err != nil {
+		return err
+	}
+	return c.NoContent(http.StatusOK)
 }
