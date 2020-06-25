@@ -108,9 +108,6 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
     inputRef.current?.focus();
   };
 
-  const handleCopyClipboard = (e: MouseEvent<HTMLElement>) => {
-  }
-
   const handleDeleteClipboard = (targetClipboard: Clipboard, e: MouseEvent<HTMLElement>) => {
     e.stopPropagation();
     api.del(`/clipboards/${targetClipboard.id}`).then(() => {
@@ -175,7 +172,7 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
       </Container>
       <Grid container spacing={3} className={classes.clipboards}>
         {clipboards.map((c) => (
-          <Grid item xs={6} key={c.id} onClick={handleCopyClipboard}>
+          <Grid item xs={6} key={c.id}>
             <CopyToClipboard text={c.data}>
               <Tooltip title="Clip to copy">
                 <Card className={classes.paper}>
