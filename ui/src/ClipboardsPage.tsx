@@ -120,8 +120,9 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newClipboard: Clipboard = {
       data: e.currentTarget.value,
-      id: clipboards.length,
+      id: -clipboards.length,
     }
+    api.post<Clipboard>("/clipboards", { data: newClipboard.data });
     setClipboards([newClipboard].concat(clipboards));
     setOpen(false);
   };

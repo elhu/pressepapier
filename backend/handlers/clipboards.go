@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/elhu/pressepapier/backend/bindings"
 	"github.com/elhu/pressepapier/backend/renderings"
 	"github.com/elhu/pressepapier/backend/utils"
 	"github.com/labstack/echo/v4"
@@ -21,6 +22,24 @@ func IndexClipboards(c echo.Context, e *utils.Env) error {
 			ID:   cb.ID,
 			Data: cb.Data,
 		})
+	}
+	return c.JSON(http.StatusOK, resp)
+}
+
+// CreateClipboards - insert new clipboard, trims list and returns new entry
+func CreateClipboards(c echo.Context, e *utils.Env) error {
+	cc := c.(*utils.Context)
+	newClipboard := &bindings.Clipboard{}
+	if err := cc.Bind(newClipboard); err != nil {
+		return err
+	}
+	cb, err := e.DB.CreateClipboard(cc.Token.UID, newClipboard.Data)
+	if err != nil {
+		return err
+	}
+	resp := renderings.ClipboardResponse{
+		ID:   cb.ID,
+		Data: cb.Data,
 	}
 	return c.JSON(http.StatusOK, resp)
 }

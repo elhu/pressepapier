@@ -20,7 +20,16 @@ const get = <T = any, R = AxiosResponse<T>>(
   return api.get<T, R>(url, config)
 }
 
+const post = <T = any, R = AxiosResponse<T>>(
+  url: string,
+  data?: any,
+  config?: AxiosRequestConfig,
+): Promise<R> => {
+  return api.post<T, R>(url, data, config)
+}
+
 export default {
   setToken,
   get,
+  post,
 }
