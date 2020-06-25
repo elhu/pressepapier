@@ -118,12 +118,18 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const tempID = -clipboards.length;
     const newClipboard: Clipboard = {
       data: e.currentTarget.value,
-      id: -clipboards.length,
+      id: tempID,
     }
-    api.post<Clipboard>("/clipboards", { data: newClipboard.data });
+    const newClipboardState = [newClipboard].concat(clipboards);
     setClipboards([newClipboard].concat(clipboards));
+    api.post<Clipboard>("/clipboards", { data: newClipboard.data })
+      .then((response) => {
+        const cp = response.data;
+        setClipboards(newClipboardState.map((c) => c.id === tempID ? cp : c))
+      });
     setOpen(false);
   };
 
