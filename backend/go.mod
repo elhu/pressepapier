@@ -3,6 +3,7 @@ module github.com/elhu/pressepapier/backend
 go 1.14
 
 require (
+	firebase.google.com/go v3.13.0+incompatible
 	firebase.google.com/go/v4 v4.0.0
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/golang-migrate/migrate v3.5.4+incompatible // indirect

@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	firebase "firebase.google.com/go"
+	firebase "firebase.google.com/go/v4"
 	"github.com/elhu/pressepapier/backend/utils"
 	"github.com/labstack/echo/v4"
 	"google.golang.org/api/option"
@@ -35,7 +35,7 @@ func FirebaseAuth() (echo.MiddlewareFunc, error) {
 			}
 			rc := &utils.Context{
 				Context: c,
-				Token:   nil,
+				Token:   token,
 			}
 			return next(rc)
 		}

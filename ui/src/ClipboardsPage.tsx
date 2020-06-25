@@ -1,4 +1,4 @@
-import React, { MouseEvent } from 'react';
+import React, { MouseEvent, useCallback } from 'react';
 import { Redirect } from 'react-router-dom';
 
 import { Grid, Button, Container, makeStyles, Typography, Modal, Backdrop, Fade, TextField, Card, CardContent, CardActions, Tooltip } from '@material-ui/core';
@@ -7,6 +7,7 @@ import CopyToClipboard from 'react-copy-to-clipboard';
 import { ROUTE_HOME } from './const';
 
 import { loggedIn } from './utils/session';
+import api from './api';
 
 const useStyles = makeStyles((theme) => ({
   main: {
@@ -76,10 +77,24 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
   const [clipboards, setClipboards] = React.useState(initClipboards);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
+  const setApiToken = useCallback(async (user: firebase.User) => {
+    const idToken = await user.getIdToken()
+    if (!idToken) {
+      console.warn('[Firebase error]: idToken is not provided')
+      return
+    }
+    api.setToken(idToken)
+  }, []);
 
   React.useEffect(() => {
-    setClipboards([]);
-  }, []);
+    const getAllClipboards = async () => {
+      if (props.currentUser) {
+        await setApiToken(props?.currentUser);
+        setClipboards((await api.get<Clipboard[]>("/clipboards")).data)
+      }
+    }
+    getAllClipboards()
+  }, [props, setApiToken]);
 
   const handleClose = () => {
     setOpen(false);
