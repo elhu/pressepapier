@@ -1,4 +1,4 @@
-import React, { MouseEvent } from 'react';
+import React, { MouseEvent, useCallback } from 'react';
 import { Redirect } from 'react-router-dom';
 
 import { Grid, Button, Container, makeStyles, Typography, Modal, Backdrop, Fade, TextField, Card, CardContent, CardActions, Tooltip } from '@material-ui/core';
@@ -7,6 +7,7 @@ import CopyToClipboard from 'react-copy-to-clipboard';
 import { ROUTE_HOME } from './const';
 
 import { loggedIn } from './utils/session';
+import api from './api';
 
 const useStyles = makeStyles((theme) => ({
   main: {
@@ -76,10 +77,24 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
   const [clipboards, setClipboards] = React.useState(initClipboards);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
+  const setApiToken = useCallback(async (user: firebase.User) => {
+    const idToken = await user.getIdToken()
+    if (!idToken) {
+      console.warn('[Firebase error]: idToken is not provided')
+      return
+    }
+    api.setToken(idToken)
+  }, []);
 
   React.useEffect(() => {
-    setClipboards([]);
-  }, []);
+    const getAllClipboards = async () => {
+      if (props.currentUser) {
+        await setApiToken(props?.currentUser);
+        setClipboards((await api.get<Clipboard[]>("/clipboards")).data)
+      }
+    }
+    getAllClipboards()
+  }, [props, setApiToken]);
 
   const handleClose = () => {
     setOpen(false);
@@ -93,21 +108,26 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
     inputRef.current?.focus();
   };
 
-  const handleCopyClipboard = (e: MouseEvent<HTMLElement>) => {
-  }
-
   const handleDeleteClipboard = (targetClipboard: Clipboard, e: MouseEvent<HTMLElement>) => {
-    const idx = clipboards.findIndex((c) => c.id === targetClipboard.id)
-    setClipboards(Array.prototype.concat(clipboards.slice(0, idx), clipboards.slice(idx + 1)))
     e.stopPropagation();
+    api.del(`/clipboards/${targetClipboard.id}`).then(() => {
+      setClipboards(clipboards.filter((c) => c.id !== targetClipboard.id));
+    });
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const tempID = -clipboards.length;
     const newClipboard: Clipboard = {
       data: e.currentTarget.value,
-      id: clipboards.length,
+      id: tempID,
     }
+    const newClipboardState = [newClipboard].concat(clipboards);
     setClipboards([newClipboard].concat(clipboards));
+    api.post<Clipboard>("/clipboards", { data: newClipboard.data })
+      .then((response) => {
+        const cp = response.data;
+        setClipboards(newClipboardState.map((c) => c.id === tempID ? cp : c))
+      });
     setOpen(false);
   };
 
@@ -152,7 +172,7 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
       </Container>
       <Grid container spacing={3} className={classes.clipboards}>
         {clipboards.map((c) => (
-          <Grid item xs={6} key={c.id} onClick={handleCopyClipboard}>
+          <Grid item xs={6} key={c.id}>
             <CopyToClipboard text={c.data}>
               <Tooltip title="Clip to copy">
                 <Card className={classes.paper}>
