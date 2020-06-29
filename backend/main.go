@@ -48,5 +48,9 @@ func main() {
 	g.DELETE("/clipboards/:id", handlerWrapper(env, handlers.DeleteClipboards))
 
 	// Start server
-	e.Logger.Fatal(e.Start(":1323"))
+	port, found := os.LookupEnv("PORT")
+	if !found {
+		port = "1323"
+	}
+	e.Logger.Fatal(e.Start(":" + port))
 }
