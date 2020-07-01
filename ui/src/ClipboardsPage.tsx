@@ -79,21 +79,17 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
 
   const setApiToken = useCallback(async (user: firebase.User) => {
     const idToken = await user.getIdToken()
-    if (!idToken) {
-      console.warn('[Firebase error]: idToken is not provided')
-      return
-    }
     api.setToken(idToken)
   }, []);
 
   React.useEffect(() => {
-    const getAllClipboards = async () => {
-      if (props.currentUser) {
-        await setApiToken(props?.currentUser);
-        setClipboards((await api.get<Clipboard[]>("/clipboards")).data)
-      }
+    const getAllClipboards = async (currentUser: firebase.User) => {
+      await setApiToken(currentUser);
+      setClipboards((await api.get<Clipboard[]>("/clipboards")).data)
     }
-    getAllClipboards()
+    if (props.currentUser) {
+      getAllClipboards(props.currentUser)
+    }
   }, [props, setApiToken]);
 
   const handleClose = () => {
@@ -108,14 +104,17 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
     inputRef.current?.focus();
   };
 
-  const handleDeleteClipboard = (targetClipboard: Clipboard, e: MouseEvent<HTMLElement>) => {
+  const handleDeleteClipboard = async (targetClipboard: Clipboard, e: MouseEvent<HTMLElement>) => {
     e.stopPropagation();
-    api.del(`/clipboards/${targetClipboard.id}`).then(() => {
-      setClipboards(clipboards.filter((c) => c.id !== targetClipboard.id));
-    });
+    if (props.currentUser) {
+      await setApiToken(props.currentUser);
+      api.del(`/clipboards/${targetClipboard.id}`).then(() => {
+        setClipboards(clipboards.filter((c) => c.id !== targetClipboard.id));
+      });
+    }
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleChange = async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const tempID = -clipboards.length;
     const newClipboard: Clipboard = {
       data: e.currentTarget.value,
@@ -123,11 +122,14 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
     }
     const newClipboardState = [newClipboard].concat(clipboards);
     setClipboards([newClipboard].concat(clipboards));
-    api.post<Clipboard>("/clipboards", { data: newClipboard.data })
-      .then((response) => {
-        const cp = response.data;
-        setClipboards(newClipboardState.map((c) => c.id === tempID ? cp : c))
-      });
+    if (props.currentUser) {
+      await setApiToken(props.currentUser);
+      api.post<Clipboard>("/clipboards", { data: newClipboard.data })
+        .then((response) => {
+          const cp = response.data;
+          setClipboards(newClipboardState.map((c) => c.id === tempID ? cp : c))
+        });
+    }
     setOpen(false);
   };
 
