@@ -60,6 +60,7 @@ interface IProps {
 export interface IClipboard {
   data: string;
   id: number;
+  pending?: boolean;
 }
 
 const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
@@ -98,6 +99,7 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
 
   const handleDeleteClipboard = async (targetClipboard: IClipboard, e: MouseEvent<HTMLElement>) => {
     e.stopPropagation();
+    setClipboards(clipboards.map((c) => (c.id === targetClipboard.id ? { ...c, pending: true } : c)));
     if (props.currentUser) {
       await setApiToken(props.currentUser);
       api.del(`/clipboards/${targetClipboard.id}`).then(() => {
@@ -111,6 +113,7 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
     const newClipboard: IClipboard = {
       data: e.currentTarget.value,
       id: tempID,
+      pending: true,
     };
     const newClipboardState = [newClipboard].concat(clipboards);
     setClipboards([newClipboard].concat(clipboards));
