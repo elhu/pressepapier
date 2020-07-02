@@ -1,13 +1,13 @@
 import React, { MouseEvent, useCallback } from 'react';
 import { Redirect } from 'react-router-dom';
 
-import { Grid, Button, Container, makeStyles, Typography, Modal, Backdrop, Fade, TextField, Card, CardContent, CardActions, Tooltip } from '@material-ui/core';
-import CopyToClipboard from 'react-copy-to-clipboard';
+import { Grid, Container, makeStyles, Typography, Modal, Backdrop, Fade, TextField } from '@material-ui/core';
 
 import { ROUTE_HOME } from './const';
 
 import { loggedIn } from './utils/session';
 import api from './api';
+import Clipboard from './Clipboard';
 
 const useStyles = makeStyles((theme) => ({
   main: {
@@ -35,8 +35,6 @@ const useStyles = makeStyles((theme) => ({
   dumpZone: {
     backgroundColor: 'transparent',
     marginBottom: theme.spacing(4),
-    // width: '50vw',
-    // height: '50vh',
   },
   dumpZoneInput: {
     '&::placeholder': {
@@ -50,12 +48,6 @@ const useStyles = makeStyles((theme) => ({
     width: '50vw',
     height: '50vh',
   },
-  paper: {
-    padding: theme.spacing(2),
-    textAlign: 'center',
-    color: theme.palette.text.secondary,
-    cursor: 'pointer',
-  },
   clipboards: {
     marginTop: theme.spacing(4),
   },
@@ -65,30 +57,30 @@ interface IProps {
   currentUser: firebase.User | null;
 }
 
-interface Clipboard {
-  data: string,
-  id: number,
+export interface IClipboard {
+  data: string;
+  id: number;
 }
 
 const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
-  const initClipboards: Clipboard[] = [];
+  const initClipboards: IClipboard[] = [];
   const [clipboards, setClipboards] = React.useState(initClipboards);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   const setApiToken = useCallback(async (user: firebase.User) => {
-    const idToken = await user.getIdToken()
-    api.setToken(idToken)
+    const idToken = await user.getIdToken();
+    api.setToken(idToken);
   }, []);
 
   React.useEffect(() => {
     const getAllClipboards = async (currentUser: firebase.User) => {
       await setApiToken(currentUser);
-      setClipboards((await api.get<Clipboard[]>("/clipboards")).data)
-    }
+      setClipboards((await api.get<IClipboard[]>('/clipboards')).data);
+    };
     if (props.currentUser) {
-      getAllClipboards(props.currentUser)
+      getAllClipboards(props.currentUser);
     }
   }, [props, setApiToken]);
 
@@ -104,7 +96,7 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
     inputRef.current?.focus();
   };
 
-  const handleDeleteClipboard = async (targetClipboard: Clipboard, e: MouseEvent<HTMLElement>) => {
+  const handleDeleteClipboard = async (targetClipboard: IClipboard, e: MouseEvent<HTMLElement>) => {
     e.stopPropagation();
     if (props.currentUser) {
       await setApiToken(props.currentUser);
@@ -112,22 +104,23 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
         setClipboards(clipboards.filter((c) => c.id !== targetClipboard.id));
       });
     }
-  }
+  };
 
   const handleChange = async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const tempID = -clipboards.length;
-    const newClipboard: Clipboard = {
+    const newClipboard: IClipboard = {
       data: e.currentTarget.value,
       id: tempID,
-    }
+    };
     const newClipboardState = [newClipboard].concat(clipboards);
     setClipboards([newClipboard].concat(clipboards));
     if (props.currentUser) {
       await setApiToken(props.currentUser);
-      api.post<Clipboard>("/clipboards", { data: newClipboard.data })
+      api
+        .post<IClipboard>('/clipboards', { data: newClipboard.data })
         .then((response) => {
           const cp = response.data;
-          setClipboards(newClipboardState.map((c) => c.id === tempID ? cp : c))
+          setClipboards(newClipboardState.map((c) => (c.id === tempID ? cp : c)));
         });
     }
     setOpen(false);
@@ -174,22 +167,7 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
       </Container>
       <Grid container spacing={3} className={classes.clipboards}>
         {clipboards.map((c) => (
-          <Grid item xs={6} key={c.id}>
-            <CopyToClipboard text={c.data}>
-              <Tooltip title="Clip to copy">
-                <Card className={classes.paper}>
-                  <CardContent>
-                    <Typography component="p" variant="body1">
-                      {c.data}
-                    </Typography>
-                  </CardContent>
-                  <CardActions>
-                    <Button size="small" onClick={(e: MouseEvent<HTMLElement>) => handleDeleteClipboard(c, e)}>Delete</Button>
-                  </CardActions>
-                </Card>
-              </Tooltip>
-            </CopyToClipboard>
-          </Grid>
+          <Clipboard clipboard={c} onDelete={handleDeleteClipboard} key={c.id} />
         ))}
       </Grid>
     </Container>
