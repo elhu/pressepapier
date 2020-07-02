@@ -11,6 +11,12 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.text.secondary,
     cursor: 'pointer',
   },
+  pending: {
+    filter: 'blur(1px)',
+  },
+  pendingActions: {
+    visibility: 'hidden',
+  },
 }));
 
 interface IProps {
@@ -22,16 +28,16 @@ const Clipboard: React.FC<IProps> = (props: IProps) => {
   const classes = useStyles();
 
   return (
-    <Grid item xs={6} key={props.clipboard.id}>
+    <Grid item xs={6}>
       <CopyToClipboard text={props.clipboard.data}>
         <Tooltip title="Clip to copy">
-          <Card className={classes.paper}>
+          <Card className={`${classes.paper} ${props.clipboard.pending ? classes.pending : ''}`}>
             <CardContent>
               <Typography component="p" variant="body1">
                 {props.clipboard.data}
               </Typography>
             </CardContent>
-            <CardActions>
+            <CardActions className={`${props.clipboard.pending ? classes.pendingActions : ''}`}>
               <Button size="small" onClick={(e: MouseEvent<HTMLElement>) => props.onDelete(props.clipboard, e)}>
                 Delete
               </Button>
