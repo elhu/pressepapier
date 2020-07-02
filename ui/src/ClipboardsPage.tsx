@@ -1,7 +1,8 @@
 import React, { MouseEvent, useCallback } from 'react';
 import { Redirect } from 'react-router-dom';
 
-import { Grid, Container, makeStyles, Typography, Modal, Backdrop, Fade, TextField } from '@material-ui/core';
+import { Grid, Container, makeStyles, Typography, Modal, Backdrop, Fade, TextField, Snackbar } from '@material-ui/core';
+import Alert from '@material-ui/lab/alert';
 
 import { ROUTE_HOME } from './const';
 
@@ -66,6 +67,7 @@ export interface IClipboard {
 const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
+  const [erroring, setErroring] = React.useState(false);
   const initClipboards: IClipboard[] = [];
   const [clipboards, setClipboards] = React.useState(initClipboards);
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -75,10 +77,19 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
     api.setToken(idToken);
   }, []);
 
+  const handleNetworkError = () => {
+    setErroring(true);
+  };
+
   React.useEffect(() => {
     const getAllClipboards = async (currentUser: firebase.User) => {
       await setApiToken(currentUser);
-      setClipboards((await api.get<IClipboard[]>('/clipboards')).data);
+      api
+        .get<IClipboard[]>('/clipboards')
+        .then((response) => {
+          setClipboards(response.data);
+        })
+        .catch(handleNetworkError);
     };
     if (props.currentUser) {
       getAllClipboards(props.currentUser);
@@ -102,10 +113,18 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
     setClipboards(clipboards.map((c) => (c.id === targetClipboard.id ? { ...c, pending: true } : c)));
     if (props.currentUser) {
       await setApiToken(props.currentUser);
-      api.del(`/clipboards/${targetClipboard.id}`).then(() => {
-        setClipboards(clipboards.filter((c) => c.id !== targetClipboard.id));
-      });
+      api
+        .del(`/clipboards/${targetClipboard.id}`)
+        .then(() => {
+          setClipboards(clipboards.filter((c) => c.id !== targetClipboard.id));
+        })
+        .catch(handleNetworkError);
     }
+  };
+
+  const handleAlertClose = () => {
+    setErroring(false);
+    setClipboards(clipboards.filter((c) => !c.pending));
   };
 
   const handleChange = async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -124,7 +143,8 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
         .then((response) => {
           const cp = response.data;
           setClipboards(newClipboardState.map((c) => (c.id === tempID ? cp : c)));
-        });
+        })
+        .catch(handleNetworkError);
     }
     setOpen(false);
   };
@@ -173,6 +193,11 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
           <Clipboard clipboard={c} onDelete={handleDeleteClipboard} key={c.id} />
         ))}
       </Grid>
+      <Snackbar open={erroring} autoHideDuration={6000} onClose={handleAlertClose}>
+        <Alert elevation={6} variant="filled" onClose={handleAlertClose} severity="error">
+          Oops, something went wrong! Please try again later
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };
