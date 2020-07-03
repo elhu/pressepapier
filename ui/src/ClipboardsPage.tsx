@@ -1,24 +1,14 @@
 import React, { MouseEvent, useCallback } from 'react';
 import { Redirect } from 'react-router-dom';
 
-import {
-  Grid,
-  Container,
-  makeStyles,
-  Typography,
-  Modal,
-  Backdrop,
-  Fade,
-  TextField,
-  Snackbar,
-  Paper,
-} from '@material-ui/core';
+import { Grid, Container, makeStyles, Snackbar, Paper } from '@material-ui/core';
 
 import { ROUTE_HOME } from './const';
 
 import { loggedIn } from './utils/session';
 import api from './api';
 import Clipboard from './Clipboard';
+import AddClipboard from './AddClipboard';
 
 const useStyles = makeStyles((theme) => ({
   main: {
@@ -31,33 +21,6 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(4),
     height: '15vh',
     overflow: 'hidden',
-  },
-  addClipboard: {
-    backgroundColor: 'grey',
-    width: '100%',
-    textAlign: 'center',
-    cursor: 'pointer',
-  },
-  modal: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  dumpZone: {
-    backgroundColor: 'transparent',
-    marginBottom: theme.spacing(4),
-  },
-  dumpZoneInput: {
-    '&::placeholder': {
-      color: 'white',
-      opacity: '1',
-      fontSize: '4rem',
-      lineHeight: '4rem',
-      textAlign: 'center',
-    },
-    caretColor: 'transparent',
-    width: '50vw',
-    height: '50vh',
   },
   clipboards: {
     marginTop: theme.spacing(4),
@@ -83,11 +46,9 @@ export interface IClipboard {
 
 const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
   const classes = useStyles();
-  const [open, setOpen] = React.useState(false);
   const [erroring, setErroring] = React.useState(false);
   const initClipboards: IClipboard[] = [];
   const [clipboards, setClipboards] = React.useState(initClipboards);
-  const inputRef = React.useRef<HTMLInputElement>(null);
 
   const setApiToken = useCallback(async (user: firebase.User) => {
     const idToken = await user.getIdToken();
@@ -123,18 +84,6 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
     };
   }, [props, setApiToken]);
 
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const handleAddClipboard = () => {
-    setOpen(true);
-  };
-
-  const handleModalRendered = () => {
-    inputRef.current?.focus();
-  };
-
   const handleDeleteClipboard = async (targetClipboard: IClipboard, e: MouseEvent<HTMLElement>) => {
     e.stopPropagation();
     setClipboards(clipboards.map((c) => (c.id === targetClipboard.id ? { ...c, deletePending: true } : c)));
@@ -163,10 +112,10 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
     );
   };
 
-  const handleChange = async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const addClipboard = async (data: string) => {
     const tempID = -clipboards.length;
     const newClipboard: IClipboard = {
-      data: e.currentTarget.value,
+      data: data,
       id: tempID,
       addPending: true,
     };
@@ -182,7 +131,6 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
         })
         .catch(handleNetworkError);
     }
-    setOpen(false);
   };
 
   if (!loggedIn()) {
@@ -190,40 +138,7 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
   }
   return (
     <Container component="main" maxWidth="md" className={classes.main}>
-      <Container component="div" className={classes.addClipboard}>
-        <Modal
-          aria-labelledby="transition-modal-title"
-          aria-describedby="transition-modal-description"
-          className={classes.modal}
-          open={open}
-          onClose={handleClose}
-          closeAfterTransition
-          BackdropComponent={Backdrop}
-          BackdropProps={{
-            timeout: 500,
-          }}
-          onRendered={handleModalRendered}
-        >
-          <Fade in={open}>
-            <TextField
-              className={classes.dumpZone}
-              placeholder="⌘+V"
-              multiline
-              rows={2}
-              value=""
-              onChange={handleChange}
-              inputRef={inputRef}
-              autoFocus
-              InputProps={{
-                classes: { input: classes.dumpZoneInput },
-              }}
-            />
-          </Fade>
-        </Modal>
-        <Typography component="h1" variant="h1" onClick={handleAddClipboard}>
-          +
-        </Typography>
-      </Container>
+      <AddClipboard onClipboardAdd={addClipboard} />
       <Grid container spacing={3} className={classes.clipboards}>
         {clipboards.map((c) => (
           <Clipboard clipboard={c} onDelete={handleDeleteClipboard} key={c.id} />
