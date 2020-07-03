@@ -1,7 +1,18 @@
 import React, { MouseEvent, useCallback } from 'react';
 import { Redirect } from 'react-router-dom';
 
-import { Grid, Container, makeStyles, Typography, Modal, Backdrop, Fade, TextField, Snackbar, Paper } from '@material-ui/core';
+import {
+  Grid,
+  Container,
+  makeStyles,
+  Typography,
+  Modal,
+  Backdrop,
+  Fade,
+  TextField,
+  Snackbar,
+  Paper,
+} from '@material-ui/core';
 
 import { ROUTE_HOME } from './const';
 
@@ -56,7 +67,7 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.error.contrastText,
     padding: '1rem',
     fontWeight: theme.typography.fontWeightBold,
-  }
+  },
 }));
 
 interface IProps {
@@ -88,18 +99,28 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
   };
 
   React.useEffect(() => {
-    const getAllClipboards = async (currentUser: firebase.User) => {
-      await setApiToken(currentUser);
-      api
-        .get<IClipboard[]>('/clipboards')
-        .then((response) => {
-          setClipboards(response.data);
-        })
-        .catch(handleNetworkError);
+    const getAllClipboards = async () => {
+      if (props.currentUser) {
+        await setApiToken(props.currentUser);
+        api
+          .get<IClipboard[]>('/clipboards')
+          .then((response) => {
+            setClipboards(response.data);
+          })
+          .catch(handleNetworkError);
+      }
     };
-    if (props.currentUser) {
-      getAllClipboards(props.currentUser);
-    }
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === 'visible') {
+        await getAllClipboards();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    getAllClipboards();
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, [props, setApiToken]);
 
   const handleClose = () => {
@@ -130,14 +151,16 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
 
   const handleAlertClose = () => {
     setErroring(false);
-    setClipboards(clipboards.flatMap((c) => {
-      // Remove clipboards with failed inserts
-      if (c.addPending) {
-        return [];
-      }
-      // Clear up pending statuses
-      return { data: c.data, id: c.id };
-    }));
+    setClipboards(
+      clipboards.flatMap((c) => {
+        // Remove clipboards with failed inserts
+        if (c.addPending) {
+          return [];
+        }
+        // Clear up pending statuses
+        return { data: c.data, id: c.id };
+      }),
+    );
   };
 
   const handleChange = async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
