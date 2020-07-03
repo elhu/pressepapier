@@ -1,8 +1,7 @@
 import React, { MouseEvent, useCallback } from 'react';
 import { Redirect } from 'react-router-dom';
 
-import { Grid, Container, makeStyles, Typography, Modal, Backdrop, Fade, TextField, Snackbar } from '@material-ui/core';
-import Alert from '@material-ui/lab/alert';
+import { Grid, Container, makeStyles, Typography, Modal, Backdrop, Fade, TextField, Snackbar, Paper } from '@material-ui/core';
 
 import { ROUTE_HOME } from './const';
 
@@ -52,6 +51,12 @@ const useStyles = makeStyles((theme) => ({
   clipboards: {
     marginTop: theme.spacing(4),
   },
+  error: {
+    backgroundColor: theme.palette.error.dark,
+    color: theme.palette.error.contrastText,
+    padding: '1rem',
+    fontWeight: theme.typography.fontWeightBold,
+  }
 }));
 
 interface IProps {
@@ -61,7 +66,8 @@ interface IProps {
 export interface IClipboard {
   data: string;
   id: number;
-  pending?: boolean;
+  addPending?: boolean;
+  deletePending?: boolean;
 }
 
 const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
@@ -110,7 +116,7 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
 
   const handleDeleteClipboard = async (targetClipboard: IClipboard, e: MouseEvent<HTMLElement>) => {
     e.stopPropagation();
-    setClipboards(clipboards.map((c) => (c.id === targetClipboard.id ? { ...c, pending: true } : c)));
+    setClipboards(clipboards.map((c) => (c.id === targetClipboard.id ? { ...c, deletePending: true } : c)));
     if (props.currentUser) {
       await setApiToken(props.currentUser);
       api
@@ -124,7 +130,14 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
 
   const handleAlertClose = () => {
     setErroring(false);
-    setClipboards(clipboards.filter((c) => !c.pending));
+    setClipboards(clipboards.flatMap((c) => {
+      // Remove clipboards with failed inserts
+      if (c.addPending) {
+        return [];
+      }
+      // Clear up pending statuses
+      return { data: c.data, id: c.id };
+    }));
   };
 
   const handleChange = async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -132,7 +145,7 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
     const newClipboard: IClipboard = {
       data: e.currentTarget.value,
       id: tempID,
-      pending: true,
+      addPending: true,
     };
     const newClipboardState = [newClipboard].concat(clipboards);
     setClipboards([newClipboard].concat(clipboards));
@@ -194,9 +207,9 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
         ))}
       </Grid>
       <Snackbar open={erroring} autoHideDuration={6000} onClose={handleAlertClose}>
-        <Alert elevation={6} variant="filled" onClose={handleAlertClose} severity="error">
-          Oops, something went wrong! Please try again later
-        </Alert>
+        <Paper elevation={6} className={classes.error}>
+          Oops, something went wrong! Please try again later.
+        </Paper>
       </Snackbar>
     </Container>
   );

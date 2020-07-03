@@ -26,18 +26,19 @@ interface IProps {
 
 const Clipboard: React.FC<IProps> = (props: IProps) => {
   const classes = useStyles();
+  const isPending = props.clipboard.addPending || props.clipboard.deletePending;
 
   return (
     <Grid item xs={6}>
       <CopyToClipboard text={props.clipboard.data}>
         <Tooltip title="Clip to copy">
-          <Card className={`${classes.paper} ${props.clipboard.pending ? classes.pending : ''}`}>
+          <Card className={`${classes.paper} ${isPending ? classes.pending : ''}`}>
             <CardContent>
               <Typography component="p" variant="body1">
                 {props.clipboard.data}
               </Typography>
             </CardContent>
-            <CardActions className={`${props.clipboard.pending ? classes.pendingActions : ''}`}>
+            <CardActions className={`${isPending ? classes.pendingActions : ''}`}>
               <Button size="small" onClick={(e: MouseEvent<HTMLElement>) => props.onDelete(props.clipboard, e)}>
                 Delete
               </Button>
