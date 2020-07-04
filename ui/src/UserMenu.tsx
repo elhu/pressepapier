@@ -5,7 +5,7 @@ import { RouteComponentProps } from 'react-router';
 import { Avatar, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { AccountCircle } from '@material-ui/icons';
 
-import { ROUTE_SIGN_IN } from './const';
+import { ROUTE_HOME } from './const';
 import firebase from './utils/firebase';
 
 interface IProps extends RouteComponentProps {
@@ -18,7 +18,7 @@ const Header: React.FC<IProps> = (props: IProps) => {
 
   const handleSignIn = () => {
     setAnchorEl(null);
-    props.history.push(ROUTE_SIGN_IN);
+    props.history.push(ROUTE_HOME);
   };
 
   const handleClose = () => {

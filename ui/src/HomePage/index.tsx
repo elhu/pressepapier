@@ -60,16 +60,13 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-interface IProps {
-  currentUser: firebase.User | null;
-}
-
-const HomePage: React.FC<IProps> = (props: IProps) => {
+const HomePage: React.FC = () => {
   const classes = useStyles();
 
   if (loggedIn()) {
     return <Redirect to={ROUTE_CLIPBOARDS} />;
   }
+
   return (
     <Container component="main" maxWidth={false} className={classes.main}>
       <div className={classes.hero}>
