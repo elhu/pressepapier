@@ -1,7 +1,7 @@
 import React, { MouseEvent } from 'react';
 import { Redirect } from 'react-router-dom';
 
-import { Grid, Container, makeStyles, Snackbar, Paper } from '@material-ui/core';
+import { Grid, Container, makeStyles, Snackbar, Paper, LinearProgress } from '@material-ui/core';
 
 import { ROUTE_HOME } from './const';
 
@@ -43,6 +43,7 @@ export interface IClipboard {
 const ClipboardsPage: React.FC = () => {
   const classes = useStyles();
   const [erroring, setErroring] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
   const initClipboards: IClipboard[] = [];
   const [clipboards, setClipboards] = React.useState(initClipboards);
 
@@ -52,12 +53,14 @@ const ClipboardsPage: React.FC = () => {
 
   React.useEffect(() => {
     const getAllClipboards = async () => {
+      setLoading(true);
       api
         .get<IClipboard[]>('/clipboards')
         .then((response) => {
           setClipboards(response.data);
         })
         .catch(handleNetworkError);
+      setLoading(false);
     };
     const handleVisibilityChange = async () => {
       if (document.visibilityState === 'visible') {
@@ -74,6 +77,7 @@ const ClipboardsPage: React.FC = () => {
 
   const handleDeleteClipboard = async (targetClipboard: IClipboard, e: MouseEvent<HTMLElement>) => {
     e.stopPropagation();
+    setLoading(true);
     setClipboards(clipboards.map((c) => (c.id === targetClipboard.id ? { ...c, deletePending: true } : c)));
     api
       .del(`/clipboards/${targetClipboard.id}`)
@@ -81,6 +85,7 @@ const ClipboardsPage: React.FC = () => {
         setClipboards(clipboards.filter((c) => c.id !== targetClipboard.id));
       })
       .catch(handleNetworkError);
+    setLoading(false);
   };
 
   const handleAlertClose = () => {
@@ -104,6 +109,7 @@ const ClipboardsPage: React.FC = () => {
       id: tempID,
       addPending: true,
     };
+    setLoading(true);
     const newClipboardState = [newClipboard].concat(clipboards);
     setClipboards([newClipboard].concat(clipboards));
     api
@@ -113,25 +119,29 @@ const ClipboardsPage: React.FC = () => {
         setClipboards(newClipboardState.map((c) => (c.id === tempID ? cp : c)));
       })
       .catch(handleNetworkError);
+    setLoading(false);
   };
 
   if (!loggedIn()) {
     return <Redirect to={ROUTE_HOME} />;
   }
   return (
-    <Container component="main" maxWidth="md" className={classes.main}>
-      <AddClipboard onClipboardAdd={addClipboard} />
-      <Grid container spacing={3} className={classes.clipboards}>
-        {clipboards.map((c) => (
-          <Clipboard clipboard={c} onDelete={handleDeleteClipboard} key={c.id} />
-        ))}
-      </Grid>
-      <Snackbar open={erroring} autoHideDuration={6000} onClose={handleAlertClose}>
-        <Paper elevation={6} className={classes.error}>
-          Oops, something went wrong! Please try again later.
-        </Paper>
-      </Snackbar>
-    </Container>
+    <React.Fragment>
+      {loading && <LinearProgress />}
+      <Container component="main" maxWidth="md" className={classes.main}>
+        <AddClipboard onClipboardAdd={addClipboard} />
+        <Grid container spacing={3} className={classes.clipboards}>
+          {clipboards.map((c) => (
+            <Clipboard clipboard={c} onDelete={handleDeleteClipboard} key={c.id} />
+          ))}
+        </Grid>
+        <Snackbar open={erroring} autoHideDuration={6000} onClose={handleAlertClose}>
+          <Paper elevation={6} className={classes.error}>
+            Oops, something went wrong! Please try again later.
+          </Paper>
+        </Snackbar>
+      </Container>
+    </React.Fragment>
   );
 };
 
