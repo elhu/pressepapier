@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 interface IProps {
-  onClipboardAdd: (value: string) => void;
+  onClipboardAdd: (value: string) => Promise<void>;
 }
 
 const AddClipboard: React.FC<IProps> = (props: IProps) => {

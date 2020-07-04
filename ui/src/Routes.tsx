@@ -2,6 +2,8 @@ import React from 'react';
 import { Switch, Route, useLocation, withRouter } from 'react-router-dom';
 import { RouteComponentProps } from 'react-router';
 
+import { LinearProgress } from '@material-ui/core';
+
 import Header from './Header';
 import HomePage from './HomePage';
 import SignInPage from './SignInPage';
@@ -22,9 +24,7 @@ const Routes: React.FC<IProps> = (props) => {
             <SignInPage {...props} />
           </Route>
         )}
-        <Route path={ROUTE_CLIPBOARDS}>
-          <ClipboardsPage {...props} />
-        </Route>
+        <Route path={ROUTE_CLIPBOARDS}>{props.currentUser ? <ClipboardsPage /> : <LinearProgress />}</Route>
         <Route path={ROUTE_HOME} exact>
           <HomePage {...props} />
         </Route>

@@ -1,4 +1,4 @@
-import React, { MouseEvent, useCallback } from 'react';
+import React, { MouseEvent } from 'react';
 import { Redirect } from 'react-router-dom';
 
 import { Grid, Container, makeStyles, Snackbar, Paper } from '@material-ui/core';
@@ -33,10 +33,6 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-interface IProps {
-  currentUser: firebase.User | null;
-}
-
 export interface IClipboard {
   data: string;
   id: number;
@@ -44,16 +40,11 @@ export interface IClipboard {
   deletePending?: boolean;
 }
 
-const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
+const ClipboardsPage: React.FC = () => {
   const classes = useStyles();
   const [erroring, setErroring] = React.useState(false);
   const initClipboards: IClipboard[] = [];
   const [clipboards, setClipboards] = React.useState(initClipboards);
-
-  const setApiToken = useCallback(async (user: firebase.User) => {
-    const idToken = await user.getIdToken();
-    api.setToken(idToken);
-  }, []);
 
   const handleNetworkError = () => {
     setErroring(true);
@@ -61,15 +52,12 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
 
   React.useEffect(() => {
     const getAllClipboards = async () => {
-      if (props.currentUser) {
-        await setApiToken(props.currentUser);
-        api
-          .get<IClipboard[]>('/clipboards')
-          .then((response) => {
-            setClipboards(response.data);
-          })
-          .catch(handleNetworkError);
-      }
+      api
+        .get<IClipboard[]>('/clipboards')
+        .then((response) => {
+          setClipboards(response.data);
+        })
+        .catch(handleNetworkError);
     };
     const handleVisibilityChange = async () => {
       if (document.visibilityState === 'visible') {
@@ -82,20 +70,17 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [props, setApiToken]);
+  }, []);
 
   const handleDeleteClipboard = async (targetClipboard: IClipboard, e: MouseEvent<HTMLElement>) => {
     e.stopPropagation();
     setClipboards(clipboards.map((c) => (c.id === targetClipboard.id ? { ...c, deletePending: true } : c)));
-    if (props.currentUser) {
-      await setApiToken(props.currentUser);
-      api
-        .del(`/clipboards/${targetClipboard.id}`)
-        .then(() => {
-          setClipboards(clipboards.filter((c) => c.id !== targetClipboard.id));
-        })
-        .catch(handleNetworkError);
-    }
+    api
+      .del(`/clipboards/${targetClipboard.id}`)
+      .then(() => {
+        setClipboards(clipboards.filter((c) => c.id !== targetClipboard.id));
+      })
+      .catch(handleNetworkError);
   };
 
   const handleAlertClose = () => {
@@ -121,16 +106,13 @@ const ClipboardsPage: React.FC<IProps> = (props: IProps) => {
     };
     const newClipboardState = [newClipboard].concat(clipboards);
     setClipboards([newClipboard].concat(clipboards));
-    if (props.currentUser) {
-      await setApiToken(props.currentUser);
-      api
-        .post<IClipboard>('/clipboards', { data: newClipboard.data })
-        .then((response) => {
-          const cp = response.data;
-          setClipboards(newClipboardState.map((c) => (c.id === tempID ? cp : c)));
-        })
-        .catch(handleNetworkError);
-    }
+    api
+      .post<IClipboard>('/clipboards', { data: newClipboard.data })
+      .then((response) => {
+        const cp = response.data;
+        setClipboards(newClipboardState.map((c) => (c.id === tempID ? cp : c)));
+      })
+      .catch(handleNetworkError);
   };
 
   if (!loggedIn()) {

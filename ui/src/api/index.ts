@@ -1,5 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { API_URL } from '../const';
+import firebase from '../utils/firebase';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -8,10 +9,11 @@ const api = axios.create({
   },
   responseType: 'json',
 });
-
-const setToken = (token: string) => {
-  api.defaults.headers['Authorization'] = `Bearer ${token}`;
-};
+api.interceptors.request.use(async (config) => {
+  const token = await firebase.auth().currentUser?.getIdToken();
+  config.headers['Authorization'] = `Bearer ${token}`;
+  return config;
+});
 
 const get = <T = any, R = AxiosResponse<T>>(url: string, config?: AxiosRequestConfig): Promise<R> => {
   return api.get<T, R>(url, config);
@@ -26,7 +28,6 @@ const del = <T = any, R = AxiosResponse<T>>(url: string, config?: AxiosRequestCo
 };
 
 export default {
-  setToken,
   get,
   post,
   del,
