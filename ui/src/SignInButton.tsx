@@ -8,8 +8,8 @@ import firebase from './utils/firebase';
 import { ROUTE_HOME } from './const';
 
 interface IProps extends RouteComponentProps {
-  className: string
-  text: string
+  className: string;
+  text: string;
 }
 
 const SignInButton: React.FC<IProps> = (props: IProps) => {
@@ -29,9 +29,7 @@ const SignInButton: React.FC<IProps> = (props: IProps) => {
     }
   };
 
-  return (
-    <GoogleLoginButton className={props.className} onClick={handleGoogleSignup} text={props.text} />
-  )
-}
+  return <GoogleLoginButton className={props.className} onClick={handleGoogleSignup} text={props.text} />;
+};
 
 export default withRouter(SignInButton);
