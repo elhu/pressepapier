@@ -1,0 +1,7 @@
+{
+  "headers": {
+    "/static": {
+      "Cache-Control": "public, max-age=512000"
+    }
+  }
+}
