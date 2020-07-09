@@ -1,0 +1,11 @@
+{
+  "root": "build/",
+  "routes": {
+    "/**": "index.html"
+  },
+  "headers": {
+    "/static/**": {
+      "Cache-Control": "public, max-age=512000"
+    }
+  }
+}
