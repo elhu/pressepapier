@@ -45,6 +45,30 @@ func CreateClipboards(c echo.Context, e *utils.Env) error {
 	return c.JSON(http.StatusCreated, resp)
 }
 
+// CreateClipboards - insert new clipboard, trims list and returns new entry
+func CreateClipboardsFiles(c echo.Context, e *utils.Env) error {
+	cc := c.(*utils.Context)
+	file, err := cc.FormFile("file")
+	if err != nil {
+		return err
+	}
+	src, err := file.Open()
+	if err != nil {
+		return err
+	}
+	defer src.Close()
+
+	cb, err := e.DB.CreateClipboardFile(cc.Token.UID, src)
+	if err != nil {
+		return err
+	}
+	resp := renderings.ClipboardResponse{
+		ID:   cb.ID,
+		Data: cb.Data,
+	}
+	return c.JSON(http.StatusCreated, resp)
+}
+
 // DeleteClipboards - deletes the specified clipboard
 func DeleteClipboards(c echo.Context, e *utils.Env) error {
 	cc := c.(*utils.Context)
