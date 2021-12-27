@@ -20,8 +20,9 @@ func IndexClipboards(c echo.Context, e *utils.Env) error {
 	resp := make([]renderings.ClipboardResponse, 0)
 	for _, cb := range clipboards {
 		resp = append(resp, renderings.ClipboardResponse{
-			ID:   cb.ID,
-			Data: cb.Data,
+			ID:      cb.ID,
+			Data:    cb.Data,
+			HasFile: cb.HasFile,
 		})
 	}
 	return c.JSON(http.StatusOK, resp)

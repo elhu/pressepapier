@@ -15,7 +15,7 @@ type Clipboard struct {
 
 // AllClipboards returns all clipboards for a given user
 func (db *DB) AllClipboards(userUUID string) ([]*Clipboard, error) {
-	rows, err := db.Query("SELECT id, data FROM clipboards WHERE user_uuid = ? ORDER BY id DESC", userUUID)
+	rows, err := db.Query("SELECT id, data, file IS NOT NULL AS has_file FROM clipboards WHERE user_uuid = ? ORDER BY id DESC", userUUID)
 	if err != nil {
 		return nil, err
 	}
@@ -23,13 +23,14 @@ func (db *DB) AllClipboards(userUUID string) ([]*Clipboard, error) {
 
 	var id int
 	var data string
+	var hasFile int
 	var results []*Clipboard
 	for rows.Next() {
-		err := rows.Scan(&id, &data)
+		err := rows.Scan(&id, &data, &hasFile)
 		if err != nil {
 			return nil, err
 		}
-		results = append(results, &Clipboard{id, data, false, userUUID})
+		results = append(results, &Clipboard{id, data, hasFile == 1, userUUID})
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
