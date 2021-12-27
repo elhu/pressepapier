@@ -102,6 +102,28 @@ const ClipboardsPage: React.FC = () => {
     );
   };
 
+  const addClipboardFile = async (data: File) => {
+    const tempID = -clipboards.length;
+    const newClipboard: IClipboard = {
+      data: 'New Image',
+      id: tempID,
+      addPending: true,
+    };
+    setLoading(true);
+    const newClipboardState = [newClipboard].concat(clipboards);
+    setClipboards([newClipboard].concat(clipboards));
+    const form = new FormData();
+    form.append('file', data);
+    api
+      .postFile<IClipboard>('/clipboards/files', form)
+      .then((response) => {
+        const cp = response.data;
+        setClipboards(newClipboardState.map((c) => (c.id === tempID ? cp : c)));
+      })
+      .catch(handleNetworkError);
+    setLoading(false);
+  };
+
   const addClipboard = async (data: string) => {
     const tempID = -clipboards.length;
     const newClipboard: IClipboard = {
@@ -129,7 +151,7 @@ const ClipboardsPage: React.FC = () => {
     <React.Fragment>
       {loading && <LinearProgress />}
       <Container component="main" maxWidth="md" className={classes.main}>
-        <AddClipboard onClipboardAdd={addClipboard} />
+        <AddClipboard onClipboardAdd={addClipboard} onClipboardFileAdd={addClipboardFile} />
         <Grid container spacing={3} className={classes.clipboards}>
           {clipboards.map((c) => (
             <Clipboard clipboard={c} onDelete={handleDeleteClipboard} key={c.id} />
