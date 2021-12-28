@@ -27,10 +27,31 @@ interface IProps {
 }
 
 const displayImage = async (setImageURL: React.Dispatch<React.SetStateAction<string>>, props: IProps) => {
-  api.getBlob(`/clipboards/${props.clipboard.id}/files`).then((response) => {
-    const objectURL = URL.createObjectURL(new Blob([response.data]));
-    setImageURL(objectURL);
-  }).catch(props.onNetworkError);
+  api
+    .getBlob(`/clipboards/${props.clipboard.id}/files`)
+    .then((response) => {
+      const objectURL = URL.createObjectURL(new Blob([response.data]));
+      setImageURL(objectURL);
+    })
+    .catch(props.onNetworkError);
+};
+
+const onDelete = async (props: IProps, objectURL: string, e: MouseEvent<HTMLElement>) => {
+  props.onDelete(props.clipboard, e);
+  if (objectURL !== '') {
+    URL.revokeObjectURL(objectURL);
+  }
+};
+
+const handleFileCopy = async (imageURL: string) => {
+  if (imageURL !== '') {
+    const file = await fetch(imageURL)
+      .then((r: Response) => r.blob())
+      .then((blobFile: Blob) => new File([blobFile], 'file.png', { type: 'image/png' }));
+    const items = { [file.type]: file };
+    const clipboardItem = new ClipboardItem(items);
+    await navigator.clipboard.write([clipboardItem]);
+  }
 };
 
 const Clipboard: React.FC<IProps> = (props: IProps) => {
@@ -45,16 +66,17 @@ const Clipboard: React.FC<IProps> = (props: IProps) => {
 
   return (
     <Grid item xs={6}>
-      <CopyToClipboard text={props.clipboard.data}>
+      <CopyToClipboard
+        text={props.clipboard.data}
+        onCopy={() => {
+          handleFileCopy(imageURL);
+        }}
+      >
         <Tooltip title="Clip to copy">
           <Card className={`${classes.paper} ${isPending ? classes.pending : ''}`}>
             <CardContent>
               {props.clipboard.hasFile ? (
-                <img
-                  src={imageURL}
-                  onLoad={() => URL.revokeObjectURL(imageURL)}
-                  alt={`File for clipboard ${props.clipboard.id}`}
-                />
+                <img src={imageURL} alt={`File for clipboard ${props.clipboard.id}`} />
               ) : (
                 <Typography component="p" variant="body1">
                   {' '}
@@ -63,7 +85,7 @@ const Clipboard: React.FC<IProps> = (props: IProps) => {
               )}
             </CardContent>
             <CardActions className={`${isPending ? classes.pendingActions : ''}`}>
-              <Button size="small" onClick={(e: MouseEvent<HTMLElement>) => props.onDelete(props.clipboard, e)}>
+              <Button size="small" onClick={(e: MouseEvent<HTMLElement>) => onDelete(props, imageURL, e)}>
                 Delete
               </Button>
             </CardActions>

@@ -1,5 +1,8 @@
 # pressepapier
+
 Shared clipboard using Go + React
+
+For firefox, set `dom.events.asyncClipboard.clipboardItem` to `true` in `about:config`.
 
 ## Getting the project running
 
