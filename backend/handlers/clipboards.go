@@ -82,3 +82,17 @@ func DeleteClipboards(c echo.Context, e *utils.Env) error {
 	}
 	return c.NoContent(http.StatusOK)
 }
+
+// GetClipboardFile - get the file attached to a specific clipboard
+func GetClipboardFile(c echo.Context, e *utils.Env) error {
+	cc := c.(*utils.Context)
+	id, err := strconv.Atoi(cc.Param("id"))
+	if err != nil {
+		return err
+	}
+	file, err := e.DB.GetClipboardFile(cc.Token.UID, id)
+	if err != nil {
+		return err
+	}
+	return c.Stream(http.StatusOK, "image/png", file)
+}

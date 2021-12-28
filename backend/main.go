@@ -46,6 +46,7 @@ func main() {
 	g.GET("/clipboards", handlerWrapper(env, handlers.IndexClipboards))
 	g.POST("/clipboards", handlerWrapper(env, handlers.CreateClipboards))
 	g.POST("/clipboards/files", handlerWrapper(env, handlers.CreateClipboardsFiles))
+	g.GET("/clipboards/:id/files", handlerWrapper(env, handlers.GetClipboardFile))
 	g.DELETE("/clipboards/:id", handlerWrapper(env, handlers.DeleteClipboards))
 
 	// Start server

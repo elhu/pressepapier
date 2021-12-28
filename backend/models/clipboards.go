@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 	"io"
+	"strings"
 )
 
 // Clipboard represents clipboard records from the database
@@ -147,4 +148,26 @@ func (db *DB) DeleteClipboard(userUUID string, cbID int) error {
 	`
 	_, err := db.Exec(stmt, userUUID, cbID)
 	return err
+}
+
+// GetClipboardFile returns the file data associated with the specified clipboard and user
+func (db *DB) GetClipboardFile(userUUID string, cbID int) (io.Reader, error) {
+	rows, err := db.Query("SELECT id, file FROM clipboards WHERE user_uuid = ? AND id = ? LIMIT 1", userUUID, cbID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var id int
+	var fileData string
+	for rows.Next() {
+		err := rows.Scan(&id, &fileData)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return strings.NewReader(fileData), nil
 }
