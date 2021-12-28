@@ -1,6 +1,7 @@
 module github.com/elhu/pressepapier/backend
 
-go 1.14
+// +heroku goVersion go1.16
+go 1.16
 
 require (
 	firebase.google.com/go v3.13.0+incompatible
