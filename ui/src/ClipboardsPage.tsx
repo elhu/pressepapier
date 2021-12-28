@@ -36,6 +36,7 @@ const useStyles = makeStyles((theme) => ({
 export interface IClipboard {
   data: string;
   id: number;
+  hasFile: boolean;
   addPending?: boolean;
   deletePending?: boolean;
 }
@@ -97,9 +98,32 @@ const ClipboardsPage: React.FC = () => {
           return [];
         }
         // Clear up pending statuses
-        return { data: c.data, id: c.id };
+        return { data: c.data, id: c.id, hasFile: c.hasFile };
       }),
     );
+  };
+
+  const addClipboardFile = async (data: File) => {
+    const tempID = -clipboards.length;
+    const newClipboard: IClipboard = {
+      data: 'New Image',
+      id: tempID,
+      addPending: true,
+      hasFile: true,
+    };
+    setLoading(true);
+    const newClipboardState = [newClipboard].concat(clipboards);
+    setClipboards([newClipboard].concat(clipboards));
+    const form = new FormData();
+    form.append('file', data);
+    api
+      .postFile<IClipboard>('/clipboards/files', form)
+      .then((response) => {
+        const cp = response.data;
+        setClipboards(newClipboardState.map((c) => (c.id === tempID ? cp : c)));
+      })
+      .catch(handleNetworkError);
+    setLoading(false);
   };
 
   const addClipboard = async (data: string) => {
@@ -108,6 +132,7 @@ const ClipboardsPage: React.FC = () => {
       data: data,
       id: tempID,
       addPending: true,
+      hasFile: false,
     };
     setLoading(true);
     const newClipboardState = [newClipboard].concat(clipboards);
@@ -129,10 +154,10 @@ const ClipboardsPage: React.FC = () => {
     <React.Fragment>
       {loading && <LinearProgress />}
       <Container component="main" maxWidth="md" className={classes.main}>
-        <AddClipboard onClipboardAdd={addClipboard} />
+        <AddClipboard onClipboardAdd={addClipboard} onClipboardFileAdd={addClipboardFile} />
         <Grid container spacing={3} className={classes.clipboards}>
           {clipboards.map((c) => (
-            <Clipboard clipboard={c} onDelete={handleDeleteClipboard} key={c.id} />
+            <Clipboard onNetworkError={handleNetworkError} clipboard={c} onDelete={handleDeleteClipboard} key={c.id} />
           ))}
         </Grid>
         <Snackbar open={erroring} autoHideDuration={6000} onClose={handleAlertClose}>

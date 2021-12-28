@@ -20,8 +20,9 @@ func IndexClipboards(c echo.Context, e *utils.Env) error {
 	resp := make([]renderings.ClipboardResponse, 0)
 	for _, cb := range clipboards {
 		resp = append(resp, renderings.ClipboardResponse{
-			ID:   cb.ID,
-			Data: cb.Data,
+			ID:      cb.ID,
+			Data:    cb.Data,
+			HasFile: cb.HasFile,
 		})
 	}
 	return c.JSON(http.StatusOK, resp)
@@ -45,6 +46,31 @@ func CreateClipboards(c echo.Context, e *utils.Env) error {
 	return c.JSON(http.StatusCreated, resp)
 }
 
+// CreateClipboards - insert new clipboard, trims list and returns new entry
+func CreateClipboardsFiles(c echo.Context, e *utils.Env) error {
+	cc := c.(*utils.Context)
+	file, err := cc.FormFile("file")
+	if err != nil {
+		return err
+	}
+	src, err := file.Open()
+	if err != nil {
+		return err
+	}
+	defer src.Close()
+
+	cb, err := e.DB.CreateClipboardFile(cc.Token.UID, src)
+	if err != nil {
+		return err
+	}
+	resp := renderings.ClipboardResponse{
+		ID:      cb.ID,
+		Data:    cb.Data,
+		HasFile: true,
+	}
+	return c.JSON(http.StatusCreated, resp)
+}
+
 // DeleteClipboards - deletes the specified clipboard
 func DeleteClipboards(c echo.Context, e *utils.Env) error {
 	cc := c.(*utils.Context)
@@ -56,4 +82,18 @@ func DeleteClipboards(c echo.Context, e *utils.Env) error {
 		return err
 	}
 	return c.NoContent(http.StatusOK)
+}
+
+// GetClipboardFile - get the file attached to a specific clipboard
+func GetClipboardFile(c echo.Context, e *utils.Env) error {
+	cc := c.(*utils.Context)
+	id, err := strconv.Atoi(cc.Param("id"))
+	if err != nil {
+		return err
+	}
+	file, err := e.DB.GetClipboardFile(cc.Token.UID, id)
+	if err != nil {
+		return err
+	}
+	return c.Stream(http.StatusOK, "image/png", file)
 }

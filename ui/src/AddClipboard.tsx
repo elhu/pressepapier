@@ -34,11 +34,13 @@ const useStyles = makeStyles((theme) => ({
 
 interface IProps {
   onClipboardAdd: (value: string) => Promise<void>;
+  onClipboardFileAdd: (value: File) => Promise<void>;
 }
 
 const AddClipboard: React.FC<IProps> = (props: IProps) => {
   const classes = useStyles();
   const inputRef = React.useRef<HTMLInputElement>(null);
+  const imageRef = React.useRef<HTMLImageElement>(null);
   const [open, setOpen] = React.useState(false);
 
   const handleModalRendered = () => {
@@ -56,6 +58,17 @@ const AddClipboard: React.FC<IProps> = (props: IProps) => {
   const handleChange = async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setOpen(false);
     await props.onClipboardAdd(e.currentTarget.value);
+  };
+
+  const handlePaste = async (e: React.ClipboardEvent<HTMLDivElement>) => {
+    setOpen(false);
+    if (e.clipboardData.items.length > 0) {
+      const file = e.clipboardData.items[0].getAsFile();
+      if (file?.type === 'image/png' && imageRef) {
+        await props.onClipboardFileAdd(file);
+      }
+      // warn that only pngs are supported
+    }
   };
 
   return (
@@ -80,6 +93,7 @@ const AddClipboard: React.FC<IProps> = (props: IProps) => {
             multiline
             rows={2}
             value=""
+            onPaste={handlePaste}
             onChange={handleChange}
             inputRef={inputRef}
             autoFocus
