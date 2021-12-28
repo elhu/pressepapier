@@ -157,7 +157,7 @@ const ClipboardsPage: React.FC = () => {
         <AddClipboard onClipboardAdd={addClipboard} onClipboardFileAdd={addClipboardFile} />
         <Grid container spacing={3} className={classes.clipboards}>
           {clipboards.map((c) => (
-            <Clipboard clipboard={c} onDelete={handleDeleteClipboard} key={c.id} />
+            <Clipboard onNetworkError={handleNetworkError} clipboard={c} onDelete={handleDeleteClipboard} key={c.id} />
           ))}
         </Grid>
         <Snackbar open={erroring} autoHideDuration={6000} onClose={handleAlertClose}>

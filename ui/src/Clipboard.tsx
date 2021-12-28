@@ -23,13 +23,14 @@ const useStyles = makeStyles((theme) => ({
 interface IProps {
   clipboard: IClipboard;
   onDelete: (c: IClipboard, e: MouseEvent<HTMLElement>) => void;
+  onNetworkError: () => void;
 }
 
 const displayImage = async (setImageURL: React.Dispatch<React.SetStateAction<string>>, props: IProps) => {
   api.getBlob(`/clipboards/${props.clipboard.id}/files`).then((response) => {
     const objectURL = URL.createObjectURL(new Blob([response.data]));
     setImageURL(objectURL);
-  });
+  }).catch(props.onNetworkError);
 };
 
 const Clipboard: React.FC<IProps> = (props: IProps) => {

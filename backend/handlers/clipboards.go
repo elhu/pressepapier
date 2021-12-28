@@ -64,8 +64,9 @@ func CreateClipboardsFiles(c echo.Context, e *utils.Env) error {
 		return err
 	}
 	resp := renderings.ClipboardResponse{
-		ID:   cb.ID,
-		Data: cb.Data,
+		ID:      cb.ID,
+		Data:    cb.Data,
+		HasFile: true,
 	}
 	return c.JSON(http.StatusCreated, resp)
 }
