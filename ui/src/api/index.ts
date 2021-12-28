@@ -20,6 +20,10 @@ const get = <T = any, R = AxiosResponse<T>>(url: string, config?: AxiosRequestCo
   return api.get<T, R>(url, config);
 };
 
+const getBlob = <T = any, R = AxiosResponse<T>>(url: string, config?: AxiosRequestConfig): Promise<R> => {
+  return api.get<T, R>(url, { ...config, responseType: 'blob' });
+};
+
 const post = <T = any, R = AxiosResponse<T>>(url: string, data?: any, config?: AxiosRequestConfig): Promise<R> => {
   return api.post<T, R>(url, data, config);
 };
@@ -38,6 +42,7 @@ const del = <T = any, R = AxiosResponse<T>>(url: string, config?: AxiosRequestCo
 
 export default {
   get,
+  getBlob,
   post,
   postFile,
   del,

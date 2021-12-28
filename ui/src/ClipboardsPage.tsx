@@ -36,6 +36,7 @@ const useStyles = makeStyles((theme) => ({
 export interface IClipboard {
   data: string;
   id: number;
+  hasFile: boolean;
   addPending?: boolean;
   deletePending?: boolean;
 }
@@ -97,7 +98,7 @@ const ClipboardsPage: React.FC = () => {
           return [];
         }
         // Clear up pending statuses
-        return { data: c.data, id: c.id };
+        return { data: c.data, id: c.id, hasFile: c.hasFile };
       }),
     );
   };
@@ -108,6 +109,7 @@ const ClipboardsPage: React.FC = () => {
       data: 'New Image',
       id: tempID,
       addPending: true,
+      hasFile: true,
     };
     setLoading(true);
     const newClipboardState = [newClipboard].concat(clipboards);
@@ -130,6 +132,7 @@ const ClipboardsPage: React.FC = () => {
       data: data,
       id: tempID,
       addPending: true,
+      hasFile: false,
     };
     setLoading(true);
     const newClipboardState = [newClipboard].concat(clipboards);

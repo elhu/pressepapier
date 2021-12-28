@@ -3,6 +3,7 @@ import React, { MouseEvent } from 'react';
 import { Grid, Button, makeStyles, Typography, Card, CardContent, CardActions, Tooltip } from '@material-ui/core';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { IClipboard } from './ClipboardsPage';
+import api from './api';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -24,9 +25,22 @@ interface IProps {
   onDelete: (c: IClipboard, e: MouseEvent<HTMLElement>) => void;
 }
 
+const displayImage = async (setImageURL: React.Dispatch<React.SetStateAction<string>>, props: IProps) => {
+  api.getBlob(`/clipboards/${props.clipboard.id}/files`).then((response) => {
+    const objectURL = URL.createObjectURL(new Blob([response.data]));
+    setImageURL(objectURL);
+  });
+};
+
 const Clipboard: React.FC<IProps> = (props: IProps) => {
   const classes = useStyles();
   const isPending = props.clipboard.addPending || props.clipboard.deletePending;
+  const [imageURL, setImageURL] = React.useState('');
+  React.useEffect(() => {
+    if (props.clipboard.hasFile) {
+      displayImage(setImageURL, props);
+    }
+  }, [props]);
 
   return (
     <Grid item xs={6}>
@@ -34,9 +48,18 @@ const Clipboard: React.FC<IProps> = (props: IProps) => {
         <Tooltip title="Clip to copy">
           <Card className={`${classes.paper} ${isPending ? classes.pending : ''}`}>
             <CardContent>
-              <Typography component="p" variant="body1">
-                {props.clipboard.data}
-              </Typography>
+              {props.clipboard.hasFile ? (
+                <img
+                  src={imageURL}
+                  onLoad={() => URL.revokeObjectURL(imageURL)}
+                  alt={`File for clipboard ${props.clipboard.id}`}
+                />
+              ) : (
+                <Typography component="p" variant="body1">
+                  {' '}
+                  {props.clipboard.data}{' '}
+                </Typography>
+              )}
             </CardContent>
             <CardActions className={`${isPending ? classes.pendingActions : ''}`}>
               <Button size="small" onClick={(e: MouseEvent<HTMLElement>) => props.onDelete(props.clipboard, e)}>
