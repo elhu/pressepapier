@@ -26,7 +26,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts --openssl-legacy-provider  --max_old_space_size=512 build",
+    "build": "react-scripts --max_old_space_size=512 build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "lint": "eslint '*/**/*.{js,ts,tsx}' --quiet --fix"
@@ -56,6 +56,6 @@
     "prettier": "^2.0.5"
   },
   "engines": {
-    "node": "12.6.3"
+    "node": "16.15.0"
   }
 }
